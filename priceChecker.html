@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Price Calculator</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      font-family: Arial, sans-serif;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: url('https://tenzotea.co/cdn/shop/articles/green_tea.jpg?v=1582694255') center center / cover no-repeat;
+      opacity: 0.15;
+      z-index: -1;
+    }
+    .container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin: 12px 0 4px;
+      text-align: left;
+    }
+    select, input {
+      width: 60%;
+      padding: 6px;
+      margin-bottom: 8px;
+      border: 1px solid #aaa;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .result {
+      margin: 8px 0;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Price Calculator</h2>
+
+    <label for="category">Category:</label>
+    <select id="category">
+      <option value="Ceremonial">Ceremonial 👑</option>
+      <option value="Premium">Premium</option>
+      <option value="Culinary">Culinary</option>
+      <option value="Industrial">Industrial/Bulk</option>
+    </select>
+
+    <label for="priceYen">Price in ¥:</label>
+    <input type="number" id="priceYen" placeholder="e.g. 1000">
+
+    <label for="grams">Weight (g):</label>
+    <input type="number" id="grams" placeholder="e.g. 50">
+
+    <div class="result" id="conversion"></div>
+    <div class="result" id="perGramInfo"></div>
+    <div class="result" id="priceCategory"></div>
+  </div>
+
+  <script>
+    const rates = { euro: 167, hkd: 9 };
+    const priceRanges = {
+      Ceremonial: [0.66, 0.8, 1.0, 1.3],
+      Premium: [0.5, 0.7, 1.0, 1.3],
+      Culinary: [0.2, 0.3, 0.4, 0.6],
+      Industrial: [0.05, 0.08, 0.12, 0.2]
+    };
+    const colors = {
+      Cheap: '#a8d5a2',
+      'Cheap-Normal': '#cce5b4',
+      Normal: '#f0e68c',
+      'Normal-Expensive': '#f4a460',
+      Expensive: '#d9534f'
+    };
+
+    const catEl = document.getElementById('category'),
+          yenEl = document.getElementById('priceYen'),
+          gEl = document.getElementById('grams'),
+          convEl = document.getElementById('conversion'),
+          perEl = document.getElementById('perGramInfo'),
+          priceEl = document.getElementById('priceCategory');
+
+    function clearAll() {
+      convEl.textContent = '';
+      perEl.textContent = '';
+      priceEl.textContent = '';
+      priceEl.style.color = '';
+    }
+
+    function update() {
+      const yen = parseFloat(yenEl.value),
+            g = parseFloat(gEl.value);
+      if (!yen || !g || g <= 0) { clearAll(); return; }
+
+      const euro = yen / rates.euro;
+      const hkd = euro * rates.hkd;
+      const ePg = euro / g;
+      const ePKg = ePg * 1000;
+
+      convEl.textContent = `≈ ${euro.toFixed(2)} €, ${hkd.toFixed(2)} HK$`;
+      perEl.textContent = `≈ ${ePg.toFixed(3)} €/g — ${ePKg.toFixed(2)} €/kg`;
+
+      const t = priceRanges[catEl.value];
+      let label = '';
+      if (ePg < t[0]) label = 'Cheap';
+      else if (ePg < t[1]) label = 'Cheap-Normal';
+      else if (ePg < t[2]) label = 'Normal';
+      else if (ePg < t[3]) label = 'Normal-Expensive';
+      else label = 'Expensive';
+
+      priceEl.textContent = `Price category: ${label}`;
+      priceEl.style.color = colors[label];
+    }
+
+    [catEl, yenEl, gEl].forEach(el => el.addEventListener('input', update));
+  </script>
+</body>
+</html>
+
